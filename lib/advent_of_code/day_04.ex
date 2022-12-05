@@ -1,103 +1,46 @@
 defmodule AdventOfCode.Day04 do
   def part1(args) do
-    {draws, grids} = prepare_data(args)
-
-    {:winner, draw, grid} =
-      Enum.reduce_while(draws, {:no_winner, grids}, fn
-        draw, {:no_winner, grids} ->
-          case process_draw(draw, grids) do
-            {:no_winner, _new_grids} = resp ->
-              {:cont, resp}
-
-            {:winner, grid, _grids} ->
-              {:halt, {:winner, draw, grid}}
-          end
-      end)
-
-    compute_winner(draw, grid)
+    args
+    |> String.split("\n", trim: true)
+    |> Enum.map(&nb_complete_overlaps/1)
+    |> Enum.sum()
   end
 
-  defp prepare_data(args) do
-    [draws_lines | grids_lines] = String.split(args, "\n")
-    draws = String.split(draws_lines, ",", trim: true)
+  defp nb_complete_overlaps(line) do
+    [elve1_x, elve1_y, elve2_x, elve2_y] =
+      String.split(line, [",", "-"])
+      |> Enum.map(&String.to_integer/1)
 
-    grids =
-      grids_lines
-      |> Enum.chunk_by(fn el -> el == "" end)
-      |> Enum.filter(fn el -> el != [""] end)
-      |> Enum.map(fn grid -> build_grid(grid, [], []) end)
-
-    {draws, grids}
-  end
-
-  defp compute_winner(draw, {_cols, lines}) do
-    String.to_integer(draw) *
-      (lines
-       |> Enum.map(fn col -> col |> Enum.map(&String.to_integer/1) |> Enum.sum() end)
-       |> Enum.sum())
-  end
-
-  defp process_draw(draw, grids) do
-    grids =
-      grids
-      |> Enum.map(fn {cols, lines} ->
-        cols = Enum.map(cols, fn elts -> Enum.filter(elts, fn elt -> elt != draw end) end)
-        lines = Enum.map(lines, fn elts -> Enum.filter(elts, fn elt -> elt != draw end) end)
-        {cols, lines}
-      end)
-
-    {winners, loosers} = remove_winning_grids(grids)
-
-    case winners do
-      [] -> {:no_winner, loosers}
-      [grid | _] -> {:winner, grid, loosers}
+    if (elve1_y - elve1_x >= elve2_y - elve2_x and
+          (elve1_x <= elve2_x && elve1_y >= elve2_y)) or
+         (elve1_y - elve1_x < elve2_y - elve2_x and
+            (elve2_x <= elve1_x &&
+               elve2_y >= elve1_y)) do
+      1
+    else
+      0
     end
   end
 
-  defp remove_winning_grids(grids) do
-    Enum.split_with(grids, fn {cols, lines} ->
-      Enum.find(cols, fn elt -> elt == [] end) != nil or
-        Enum.find(lines, fn elt -> elt == [] end) != nil
-    end)
-  end
-
-  defp build_grid([line | lines], [], []) do
-    line = String.split(line, " ", trim: true)
-    build_grid(lines, Enum.chunk_every(line, 1), [line])
-  end
-
-  defp build_grid([line_new | lines_new], cols, lines) do
-    line = String.split(line_new, " ", trim: true)
-    cols = build_cols(line, cols, [])
-    build_grid(lines_new, cols, [line | lines])
-  end
-
-  defp build_grid([], cols, lines), do: {cols, lines}
-
-  defp build_cols([col_new | cols_new], [col | cols], acc) do
-    build_cols(cols_new, cols, [[col_new | col] | acc])
-  end
-
-  defp build_cols([], [], acc), do: Enum.reverse(acc)
-
   def part2(args) do
-    {draws, grids} = prepare_data(args)
+    args
+    |> String.split("\n", trim: true)
+    |> Enum.map(&nb_overlaps/1)
+    |> Enum.sum()
+  end
 
-    {:winner, draw, grid} =
-      Enum.reduce_while(draws, {:no_winner, grids}, fn
-        draw, {:no_winner, grids} ->
-          case process_draw(draw, grids) do
-            {:no_winner, _new_grids} = resp ->
-              {:cont, resp}
+  defp nb_overlaps(line) do
+    [elve1_x, elve1_y, elve2_x, elve2_y] =
+      String.split(line, [",", "-"])
+      |> Enum.map(&String.to_integer/1)
 
-            {:winner, grid, grids} ->
-              case grids do
-                [] -> {:halt, {:winner, draw, grid}}
-                grids -> {:cont, {:no_winner, grids}}
-              end
-          end
-      end)
-
-    compute_winner(draw, grid)
+    if (elve1_x >= elve2_x and elve1_x <= elve2_y) or
+         (elve1_y >= elve2_x and elve1_y <= elve2_y) or
+         (elve2_x >= elve1_x and elve2_x <= elve1_y) or
+         (elve2_y >= elve1_x and elve2_y <= elve1_y) do
+      1
+    else
+      0
+    end
   end
 end
