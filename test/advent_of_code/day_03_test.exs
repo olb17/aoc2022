@@ -4,33 +4,27 @@ defmodule AdventOfCode.Day03Test do
   import AdventOfCode.Day03
 
   @input """
-  00100
-  11110
-  10110
-  10111
-  10101
-  01111
-  00111
-  11100
-  10000
-  11001
-  00010
-  01010
+  vJrwpWtwJgWrhcsFMMfFFhFp
+  jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+  PmmdzqPrVvPwwTWBwg
+  wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+  ttgJtRGJQctTZtZT
+  CrZsJsPPZsGzwwsLwLmpwMDw
   """
 
-  @tag :skip
+  @tag :skip2
   test "part1" do
     input = @input
     result = part1(input)
 
-    assert result == 198
+    assert result == 157
   end
 
-  @tag :skip
+  @tag :skip2
   test "part2" do
     input = @input
     result = part2(input)
 
-    assert result == 230
+    assert result == 70
   end
 end
