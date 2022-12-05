@@ -4,27 +4,24 @@ defmodule AdventOfCode.Day02Test do
   import AdventOfCode.Day02
 
   @input """
-  forward 5
-  down 5
-  forward 8
-  up 3
-  down 8
-  forward 2
+  A Y
+  B X
+  C Z
   """
 
-  @tag :skip
+  @tag :skip2
   test "part1" do
     input = @input
     result = part1(input)
 
-    assert result == 150
+    assert result == 15
   end
 
-  @tag :skip
+  @tag :skip2
   test "part2" do
     input = @input
     result = part2(input)
 
-    assert result == 900
+    assert result == 12
   end
 end

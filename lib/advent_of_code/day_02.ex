@@ -1,25 +1,52 @@
 defmodule AdventOfCode.Day02 do
   def part1(args) do
-    {pos, depth} = args |> String.split("\n", trim: true) |> Enum.reduce({0, 0}, &process_line/2)
-    pos * depth
+    args
+    |> String.split("\n", trim: true)
+    |> Enum.map(fn match ->
+      [a, b] = String.split(match, " ")
+
+      price(transco(a), transco(b))
+      |> elem(1)
+    end)
+    |> Enum.sum()
   end
 
-  defp process_line("forward " <> n, {pos, depth}), do: {pos + String.to_integer(n), depth}
-  defp process_line("down " <> n, {pos, depth}), do: {pos, depth + String.to_integer(n)}
-  defp process_line("up " <> n, {pos, depth}), do: {pos, depth - String.to_integer(n)}
+  def price(a, a), do: {price(a) + 3, price(a) + 3}
+  def price(:rock, :paper), do: {price(:rock), price(:paper) + 6}
+  def price(:rock, :scissors), do: {price(:rock) + 6, price(:scissors)}
+  def price(:paper, :scissors), do: {price(:paper), price(:scissors) + 6}
+
+  def price(a, b) do
+    {ra, rb} = price(b, a)
+    {rb, ra}
+  end
+
+  def price(:rock), do: 1
+  def price(:paper), do: 2
+  def price(:scissors), do: 3
+
+  def transco("A"), do: :rock
+  def transco("X"), do: :rock
+  def transco("B"), do: :paper
+  def transco("Y"), do: :paper
+  def transco("C"), do: :scissors
+  def transco("Z"), do: :scissors
 
   def part2(args) do
-    {pos, depth, _aim} =
-      args |> String.split("\n", trim: true) |> Enum.reduce({0, 0, 0}, &process_line2/2)
+    args
+    |> String.split("\n", trim: true)
+    |> Enum.map(fn match ->
+      [a, b] = String.split(match, " ")
 
-    pos * depth
+      price(transco(a), transco2(a, b))
+      |> elem(1)
+    end)
+    |> Enum.sum()
   end
 
-  defp process_line2("down " <> n, {pos, depth, aim}),
-    do: {pos, depth, aim + String.to_integer(n)}
-
-  defp process_line2("up " <> n, {pos, depth, aim}), do: {pos, depth, aim - String.to_integer(n)}
-
-  defp process_line2("forward " <> n, {pos, depth, aim}),
-    do: {pos + String.to_integer(n), depth + aim * String.to_integer(n), aim}
+  @loose %{"A" => :scissors, "B" => :rock, "C" => :paper}
+  @win %{"B" => :scissors, "C" => :rock, "A" => :paper}
+  def transco2(a, "Y"), do: transco(a)
+  def transco2(a, "X"), do: Map.get(@loose, a)
+  def transco2(a, "Z"), do: Map.get(@win, a)
 end
