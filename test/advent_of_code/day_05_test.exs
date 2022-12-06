@@ -3,32 +3,29 @@ defmodule AdventOfCode.Day05Test do
 
   import AdventOfCode.Day05
 
-  @input """
-  0,9 -> 5,9
-  8,0 -> 0,8
-  9,4 -> 3,4
-  2,2 -> 2,1
-  7,0 -> 7,4
-  6,4 -> 2,0
-  0,9 -> 2,9
-  3,4 -> 1,4
-  0,0 -> 8,8
-  5,5 -> 8,2
-  """
+  @input "    [D]
+[N] [C]
+[Z] [M] [P]
+ 1   2   3
 
-  @tag :skip
+move 1 from 2 to 1
+move 3 from 1 to 3
+move 2 from 2 to 1
+move 1 from 1 to 2"
+
+  @tag :skip2
   test "part1" do
     input = @input
     result = part1(input)
 
-    assert result == 5934
+    assert result == "CMZ"
   end
 
-  @tag :skip
+  @tag :skip2
   test "part2" do
     input = @input
     result = part2(input)
 
-    assert result == 12
+    assert result == "MCD"
   end
 end
