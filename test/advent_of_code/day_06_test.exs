@@ -3,21 +3,27 @@ defmodule AdventOfCode.Day06Test do
 
   import AdventOfCode.Day06
 
-  @input "3,4,3,1,2"
+  @input1 "mjqjpqmgbljsphdztnvjfqwrcgsmlb"
+  @input2 "bvwbjplbgvbhsrlpgdmjqwftvncz"
+  @input3 "nppdvjthqldpwncqszvftbrmjlhg"
+  @input4 "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg"
+  @input5 "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw"
 
-  @tag :skip
+  @tag :skip2
   test "part1" do
-    input = @input
-    result = part1(input)
-
-    assert result == 5934
+    assert part1(@input1) == 7
+    assert part1(@input2) == 5
+    assert part1(@input3) == 6
+    assert part1(@input4) == 10
+    assert part1(@input5) == 11
   end
 
-  @tag :skip
+  @tag :skip2
   test "part2" do
-    input = @input
-    result = part2(input)
-
-    assert result == 26_984_457_539
+    assert part2(@input1) == 19
+    assert part2(@input2) == 23
+    assert part2(@input3) == 23
+    assert part2(@input4) == 29
+    assert part2(@input5) == 26
   end
 end
