@@ -1,136 +1,90 @@
 defmodule AdventOfCode.Day09 do
   def part1(args) do
-    parse_args(args)
-    |> Enum.chunk_every(3, 1, :discard)
-    |> Enum.reduce([], fn lines, low_points ->
-      find_low_points(lines, low_points)
+    args
+    |> parse_instr()
+    |> Enum.reduce({[{0, 0}, {0, 0}], []}, fn {dir, nb}, {[head, tail], t_pos} ->
+      1..nb
+      |> Enum.reduce({[head, tail], t_pos}, fn _i, {[head, tail], t_pos} ->
+        new_head = move_head(head, dir)
+        new_tail = move_tail(new_head, tail)
+        {[new_head, new_tail], [new_tail | t_pos]}
+      end)
     end)
-    |> Enum.map(fn val -> val + 1 end)
-    |> Enum.sum()
-  end
-
-  def find_low_points([[_a1, _b1], [_a2, _b2], [_a3, _b3]], low_points) do
-    low_points
-  end
-
-  def find_low_points(
-        [[_a1, b1, c1 | rest1], [a2, b2, c2 | rest2], [_a3, b3, c3 | rest3]],
-        low_points
-      )
-      when b2 < a2 and b2 < c2 and b2 < b1 and b2 < b3 do
-    find_low_points([[b1, c1 | rest1], [b2, c2 | rest2], [b3, c3 | rest3]], [b2 | low_points])
-  end
-
-  def find_low_points(
-        [[_a1, b1, c1 | rest1], [_a2, b2, c2 | rest2], [_a3, b3, c3 | rest3]],
-        low_points
-      ) do
-    find_low_points([[b1, c1 | rest1], [b2, c2 | rest2], [b3, c3 | rest3]], low_points)
-  end
-
-  defp parse_args(args) do
-    lines =
-      args
-      |> String.split("\n", trim: true)
-      |> Enum.map(&String.trim/1)
-      |> Enum.map(fn line ->
-        [11] ++
-          (line
-           |> String.split("", trim: true)
-           |> Enum.map(&String.to_integer/1)) ++
-          [11]
-      end)
-
-    # height = Enum.count(lines)
-    width = Enum.at(lines, 0) |> Enum.count()
-    fake_line = List.duplicate(11, width)
-
-    [fake_line] ++ lines ++ [fake_line]
-  end
-
-  def part2(args) do
-    width =
-      args
-      |> String.split("\n", trim: true)
-      |> Enum.at(0)
-      |> String.trim()
-      |> String.length()
-
-    positions =
-      args
-      |> String.split("\n", trim: true)
-      |> Enum.map(&String.trim/1)
-      |> Enum.with_index(1)
-      |> Enum.reduce(Map.new(), fn {chars, line}, positions ->
-        chars
-        |> String.split("", trim: true)
-        |> Enum.map(&String.to_integer/1)
-        |> Enum.with_index(1)
-        |> Enum.reduce(positions, fn {val, col}, positions ->
-          Map.put(positions, {line, col}, val)
-        end)
-      end)
-
-    height = div(Enum.count(positions), width)
-
-    # add borders with 11
-    positions =
-      Enum.concat([
-        for(col <- 0..(width + 1), do: {0, col}),
-        for(col <- 0..(width + 1), do: {height + 1, col}),
-        for(line <- 0..(height + 1), do: {line, 0}),
-        for(line <- 0..(height + 1), do: {line, width + 1})
-      ])
-      |> Enum.reduce(positions, fn point, acc ->
-        Map.put(acc, point, 11)
-      end)
-
-    candidates = for col <- 1..width, line <- 1..height, do: {line, col}
-
-    candidates
-    |> Enum.filter(fn pos -> is_low(positions, pos) end)
-    |> Enum.map(fn low -> find_basin(positions, MapSet.new([low])) end)
+    |> elem(1)
     |> Enum.uniq()
-    |> Enum.map(&MapSet.size/1)
-    |> Enum.sort(:desc)
-    |> Enum.take(3)
-    |> Enum.product()
-
-    # 1442897
+    |> Enum.count()
   end
 
-  def find_basin(positions, lows) do
-    new_lows =
-      Enum.reduce(MapSet.to_list(lows), lows, fn {x, y}, acc ->
-        acc
-        |> add_to_lows({x - 1, y}, positions)
-        |> add_to_lows({x + 1, y}, positions)
-        |> add_to_lows({x, y - 1}, positions)
-        |> add_to_lows({x, y + 1}, positions)
+  defp move_head({h_x, h_y}, "R"), do: {h_x + 1, h_y}
+  defp move_head({h_x, h_y}, "L"), do: {h_x - 1, h_y}
+  defp move_head({h_x, h_y}, "U"), do: {h_x, h_y + 1}
+  defp move_head({h_x, h_y}, "D"), do: {h_x, h_y - 1}
+
+  defp move_tail({h_x, h_y}, {t_x, h_y}) when abs(h_x - t_x) > 1 do
+    {t_x + div(h_x - t_x, abs(h_x - t_x)), h_y}
+  end
+
+  defp move_tail({h_x, h_y}, {h_x, t_y}) when abs(h_y - t_y) > 1 do
+    {h_x, t_y + div(h_y - t_y, abs(h_y - t_y))}
+  end
+
+  defp move_tail({h_x, h_y}, {t_x, t_y}) when abs(h_y - t_y) > 1 or abs(h_x - t_x) > 1 do
+    {t_x + div(h_x - t_x, abs(h_x - t_x)), t_y + div(h_y - t_y, abs(h_y - t_y))}
+  end
+
+  defp move_tail(_çhead, tail), do: tail
+
+  defp parse_instr(args) do
+    args
+    |> String.split("\n", trim: true)
+    |> Enum.map(fn line ->
+      [dir, nb] = String.split(line, " ", trim: true)
+      {dir, String.to_integer(nb)}
+    end)
+  end
+
+  @spec part2(any) :: any
+  def part2(args) do
+    snake = for(_i <- 1..10, do: {10, 10})
+
+    args
+    |> parse_instr()
+    |> Enum.reduce({snake, []}, fn {dir, nb}, {snake, t_pos} ->
+      1..nb
+      |> Enum.reduce({snake, t_pos}, fn _i, {[head | tail], t_pos} ->
+        new_head = move_head(head, dir)
+        [node_9 | rest] = move_snake(new_head, tail, [])
+        {[new_head | [node_9 | rest] |> Enum.reverse()], [node_9 | t_pos]}
       end)
-
-    if new_lows == lows do
-      lows
-    else
-      find_basin(positions, new_lows)
-    end
+    end)
+    |> elem(1)
+    |> Enum.uniq()
+    |> Enum.count()
   end
 
-  def add_to_lows(lows, point, positions) do
-    if Map.get(positions, point) >= 9 do
-      lows
-    else
-      MapSet.put(lows, point)
-    end
+  defp move_snake(head, [tail1 | tail], after_tail) do
+    new_tail = move_tail(head, tail1)
+    move_snake(new_tail, tail, [new_tail | after_tail])
   end
 
-  def is_low(positions, {col, line}) do
-    up = Map.get(positions, {col, line - 1})
-    down = Map.get(positions, {col, line + 1})
-    left = Map.get(positions, {col - 1, line})
-    right = Map.get(positions, {col + 1, line - 1})
-    val = Map.get(positions, {col, line})
+  defp move_snake(_head, [], after_tail), do: after_tail
 
-    val < up and val < down and val < left and val < right
+  defp print_snake(snake) do
+    IO.puts("")
+
+    value_snake = snake |> Enum.with_index() |> Enum.reverse() |> Map.new()
+
+    playground =
+      for i <- 0..20, j <- 0..26, into: %{} do
+        {{i, j}, "."}
+      end
+      |> Map.merge(value_snake)
+
+    for i <- 0..20 do
+      for j <- 0..26, do: IO.write(playground[{i, j}])
+      IO.puts("")
+    end
+
+    snake
   end
 end
