@@ -15,21 +15,21 @@ defmodule AdventOfCode.Day09 do
     |> Enum.count()
   end
 
-  defp move_head({h_x, h_y}, "R"), do: {h_x + 1, h_y}
-  defp move_head({h_x, h_y}, "L"), do: {h_x - 1, h_y}
-  defp move_head({h_x, h_y}, "U"), do: {h_x, h_y + 1}
-  defp move_head({h_x, h_y}, "D"), do: {h_x, h_y - 1}
+  defp move_head({hx, hy}, "R"), do: {hx + 1, hy}
+  defp move_head({hx, hy}, "L"), do: {hx - 1, hy}
+  defp move_head({hx, hy}, "U"), do: {hx, hy + 1}
+  defp move_head({hx, hy}, "D"), do: {hx, hy - 1}
 
-  defp move_tail({h_x, h_y}, {t_x, h_y}) when abs(h_x - t_x) > 1 do
-    {t_x + div(h_x - t_x, abs(h_x - t_x)), h_y}
+  defp move_tail({hx, hy}, {tx, hy}) when abs(hx - tx) > 1 do
+    {tx + div(hx - tx, abs(hx - tx)), hy}
   end
 
-  defp move_tail({h_x, h_y}, {h_x, t_y}) when abs(h_y - t_y) > 1 do
-    {h_x, t_y + div(h_y - t_y, abs(h_y - t_y))}
+  defp move_tail({hx, hy}, {hx, ty}) when abs(hy - ty) > 1 do
+    {hx, ty + div(hy - ty, abs(hy - ty))}
   end
 
-  defp move_tail({h_x, h_y}, {t_x, t_y}) when abs(h_y - t_y) > 1 or abs(h_x - t_x) > 1 do
-    {t_x + div(h_x - t_x, abs(h_x - t_x)), t_y + div(h_y - t_y, abs(h_y - t_y))}
+  defp move_tail({hx, hy}, {tx, ty}) when abs(hy - ty) > 1 or abs(hx - tx) > 1 do
+    {tx + div(hx - tx, abs(hx - tx)), ty + div(hy - ty, abs(hy - ty))}
   end
 
   defp move_tail(_çhead, tail), do: tail
