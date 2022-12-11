@@ -4,31 +4,48 @@ defmodule AdventOfCode.Day11Test do
   import AdventOfCode.Day11
 
   @input """
-  5483143223
-  2745854711
-  5264556173
-  6141336146
-  6357385478
-  4167524645
-  2176841721
-  6882881134
-  4846848554
-  5283751526
+  Monkey 0:
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3
+
+  Monkey 1:
+  Starting items: 54, 65, 75, 74
+  Operation: new = old + 6
+  Test: divisible by 19
+    If true: throw to monkey 2
+    If false: throw to monkey 0
+
+  Monkey 2:
+  Starting items: 79, 60, 97
+  Operation: new = old * old
+  Test: divisible by 13
+    If true: throw to monkey 1
+    If false: throw to monkey 3
+
+  Monkey 3:
+  Starting items: 74
+  Operation: new = old + 3
+  Test: divisible by 17
+    If true: throw to monkey 0
+    If false: throw to monkey 1
   """
 
-  @tag :skip
+  @tag :skip2
   test "part1" do
     input = @input
     result = part1(input)
 
-    assert result == 1656
+    assert result == 10605
   end
 
-  @tag :skip
+  @tag :skip2
   test "part2" do
     input = @input
     result = part2(input)
 
-    assert result == 195
+    assert result == 2_713_310_158
   end
 end
