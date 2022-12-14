@@ -1,84 +1,60 @@
 defmodule AdventOfCode.Day12 do
   def part1(args) do
-    graph = make_graph(args)
-    traverse(graph, ["start"], "start", []) |> Enum.count()
-  end
+    {map, start} = parse(args)
 
-  defp traverse(_graph, curr_path, "end", success_path) do
-    [curr_path | success_path]
-  end
-
-  defp traverse(graph, curr_path, curr_node, success_path) do
-    Map.get(graph, curr_node, [])
-    |> Enum.filter(fn node ->
-      cond do
-        String.upcase(node) == node -> true
-        Enum.member?(curr_path, node) -> false
-        true -> true
-      end
-    end)
-    |> Enum.reduce(success_path, fn next_node, acc ->
-      traverse(graph, [next_node | curr_path], next_node, acc)
-    end)
+    #  %{{x,y} => {val, shortest_path_to_start}}
+    dijkstra(map, %{start => {?z + 1, 0}})
+    |> Enum.find(&(elem(&1, 1) |> elem(0) == ?a - 1))
+    |> elem(1)
+    |> elem(1)
   end
 
   def part2(args) do
-    graph = make_graph(args)
+    {map, start} = parse(args)
 
-    traverse2(graph, ["start"], "start", false, [])
-    |> Enum.count()
+    #  %{{x,y} => {val, shortest_path_to_start}}
+    dijkstra(map, %{start => {?z + 1, 0}})
+    |> Enum.filter(&(elem(&1, 1) |> elem(0) <= ?a))
+    |> Enum.map(&(elem(&1, 1) |> elem(1)))
+    |> Enum.sort()
+    |> hd
   end
 
-  defp traverse2(_graph, curr_path, "end", _twice, success_path) do
-    [curr_path | success_path]
-  end
-
-  defp traverse2(graph, curr_path, curr_node, twice, success_path) do
-    Map.get(graph, curr_node, [])
-    |> Enum.reduce([], fn node, acc ->
-      case can_be_visited?(curr_path, node, twice) do
-        {true, new_twice} ->
-          [{node, new_twice} | acc]
-
-        false ->
-          acc
-      end
+  def dijkstra(map, shortest) do
+    Enum.flat_map(shortest, fn {pos, {val, path_nb}} ->
+      find_valued_neighbours(map, pos, val, path_nb)
     end)
-    |> Enum.reduce(success_path, fn {next_node, new_twice}, acc ->
-      traverse2(graph, [next_node | curr_path], next_node, new_twice, acc)
-    end)
-  end
+    |> Enum.sort_by(&elem(&1, 2))
+    |> case do
+      [{pos, val, path_nb} | _] ->
+        dijkstra(Map.delete(map, pos), Map.put(shortest, pos, {val, path_nb}))
 
-  defp can_be_visited?(list, elt, twice) do
-    cond do
-      elt == "start" ->
-        false
-
-      String.upcase(elt) == elt ->
-        {true, twice}
-
-      true ->
-        nb = Enum.filter(list, &(&1 == elt)) |> Enum.count()
-
-        cond do
-          nb == 0 -> {true, twice}
-          !twice && nb == 1 -> {true, true}
-          true -> false
-        end
+      [] ->
+        shortest
     end
   end
 
-  def make_graph(args) do
+  # returns {x,y} => {val, shortest_path_to_start} or nil
+  @neighbours [{-1, 0}, {+1, 0}, {0, -1}, {0, 1}]
+  defp find_valued_neighbours(map, {x, y}, val, path_nb) do
+    for {nx, ny} <- @neighbours, Map.get(map, {x + nx, y + ny}, 0) >= val - 1 do
+      {{x + nx, y + ny}, Map.get(map, {x + nx, y + ny}), path_nb + 1}
+    end
+  end
+
+  defp parse(args) do
     args
     |> String.split("\n", trim: true)
-    |> Enum.reduce(%{}, fn line, acc ->
-      [a, b] = String.split(line, "-")
-      from_a = Map.get(acc, a, MapSet.new())
-      from_b = Map.get(acc, b, MapSet.new())
-
-      acc
-      |> Map.put(a, MapSet.put(from_a, b))
-      |> Map.put(b, MapSet.put(from_b, a))
+    |> Enum.with_index()
+    |> Enum.map(fn {str, i} -> {String.to_charlist(str) |> Enum.with_index(), i} end)
+    |> Enum.reduce({%{}, nil}, fn {line, i}, acc ->
+      Enum.reduce(line, acc, fn {char, j}, {map, entry} ->
+        case char do
+          ?S -> {Map.put(map, {i, j}, ?a - 1), entry}
+          ?E -> {Map.put(map, {i, j}, ?z + 1), {i, j}}
+          _ -> {Map.put(map, {i, j}, char), entry}
+        end
+      end)
     end)
   end
 end
