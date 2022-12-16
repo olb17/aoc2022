@@ -4,31 +4,23 @@ defmodule AdventOfCode.Day14Test do
   import AdventOfCode.Day14
 
   @input """
-  NNCB
-
-  CH -> B
-  HH -> N
-  CB -> H
-  NH -> C
-  HB -> C
-  HC -> B
-  HN -> C
-  NN -> C
-  BH -> H
-  NC -> B
-  NB -> B
-  BN -> B
-  BB -> N
-  BC -> B
-  CC -> N
-  CN -> C
+  498,4 -> 498,6 -> 496,6
+  503,4 -> 502,4 -> 502,9 -> 494,9
   """
 
-  @tag :skip
+  @tag :skip2
   test "part1" do
     input = @input
     result = part1(input)
 
-    assert result == 1588
+    assert result == 24
+  end
+
+  @tag :skip2
+  test "part2" do
+    input = @input
+    result = part2(input)
+
+    assert result == 93
   end
 end
